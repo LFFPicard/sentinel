@@ -1,0 +1,20 @@
+# Environment
+.env
+
+# Data volumes (never commit postgres data or import files)
+data/
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+**/dist/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
