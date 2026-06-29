@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: sentinel-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: sentinel
+      POSTGRES_USER: sentinel
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinel"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  collector:
+    build: ./collector
+    container_name: sentinel-collector
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./data/import:/import
+      - ./data/logs:/data/logs
+    environment:
+      DATABASE_URL: postgres://sentinel:${DB_PASSWORD}@postgres:5432/sentinel
+      PLEX_URL: ${PLEX_URL}
+      PLEX_TOKEN: ${PLEX_TOKEN}
+
+  api:
+    build: ./api
+    container_name: sentinel-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${SENTINEL_PORT:-7700}:7700"
+    volumes:
+      - ./data/logs:/data/logs
+    environment:
+      DATABASE_URL: postgres://sentinel:${DB_PASSWORD}@postgres:5432/sentinel
+      SENTINEL_PORT: 7700
