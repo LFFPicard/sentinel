@@ -4,6 +4,12 @@ import staticFiles from '@fastify/static'
 import websocket from '@fastify/websocket'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
+import { randomBytes } from 'crypto'
+import fs from 'fs'
+import bcrypt from 'bcryptjs'
+import { db } from './db.js'
+import { apiKeys } from '@sentinel/shared/src/schema'
+import { eq } from 'drizzle-orm'
 import { adminImportRoutes } from './routes/admin/import.js'
 import { statusRoutes } from './routes/status.js'
 import { userRoutes } from './routes/users.js'
@@ -67,9 +73,58 @@ await app.register(adminImportRoutes, { prefix: '/v1/admin' })
 // Health check (no auth)
 app.get('/health', async () => ({ status: 'ok' }))
 
+async function firstRunSetup(): Promise<void> {
+  const existing = await db.select({ id: apiKeys.id })
+    .from(apiKeys)
+    .where(eq(apiKeys.tier, 'admin'))
+    .limit(1)
+
+  if (existing.length > 0) return
+
+  const rawKey = `sk_admin_${randomBytes(24).toString('hex')}`
+  const keyHash = await bcrypt.hash(rawKey, 10)
+  const keyPrefix = rawKey.slice(0, 16)
+  const now = Math.floor(Date.now() / 1000)
+
+  await db.insert(apiKeys).values({
+    keyHash,
+    keyPrefix,
+    label: 'Admin (auto-generated)',
+    tier: 'admin',
+    createdAt: now,
+  })
+
+  // Box width driven by key length: 2 leading spaces + key + 2 trailing spaces
+  const innerWidth = rawKey.length + 4
+  const bar = '═'.repeat(innerWidth)
+  const line = (s: string) => `║  ${s.padEnd(innerWidth - 2)}║`
+  const blank = `║${' '.repeat(innerWidth)}║`
+
+  const banner = [
+    `╔${bar}╗`,
+    line('SENTINEL FIRST RUN — ADMIN KEY'),
+    blank,
+    line(rawKey),
+    blank,
+    line('Save this key — it will never be shown again.'),
+    line('Use it to log into the admin UI at /admin'),
+    `╚${bar}╝`,
+  ].join('\n')
+
+  process.stdout.write('\n' + banner + '\n\n')
+
+  // Also append to the shared log volume so /v1/admin/logs surfaces it
+  const logPath = process.env.LOG_PATH ?? '/data/logs/collector.log'
+  try {
+    const ts = new Date().toISOString().replace('T', ' ').slice(0, 19)
+    fs.appendFileSync(logPath, `[${ts}] [INFO] First-run admin key generated:\n${banner}\n`)
+  } catch { /* log volume may not be mounted yet — stdout is sufficient */ }
+}
+
 try {
   await app.listen({ port: PORT, host: '0.0.0.0' })
   console.log(`[Sentinel API] Listening on port ${PORT}`)
+  await firstRunSetup()
 } catch (err) {
   app.log.error(err)
   process.exit(1)

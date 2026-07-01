@@ -21,11 +21,11 @@ Built as the data backbone for the [LFFPicard homelab ecosystem](https://github.
 
 ## Screenshots
 
-> *(Screenshots coming soon)*
+![Sentinel Status Dashboard](assets/screenshot-status.png)
 
-<!-- Admin dashboard screenshot -->
-<!-- Import progress screenshot -->
-<!-- Status page screenshot -->
+![Sentinel Tautulli Import](assets/screenshot-import.png)
+
+![Sentinel Admin UI](assets/screenshot-admin.png)
 
 ---
 
@@ -127,12 +127,49 @@ services:
 
 Sentinel ships with a first-class Tautulli import tool. Your years of history come with you.
 
-1. Locate your `tautulli.db` file (usually in your Tautulli appdata directory)
-2. Copy it to `./data/import/tautulli.db` on your host
-3. Open the Sentinel admin UI at `/admin` → **Import**
-4. Click **Start Import** and watch the progress bar
-5. On completion you'll see a summary of imported sessions, metadata linked, and users created
-6. Tautulli can then be uninstalled
+### Clean migration (recommended)
+
+1. Stop Plex temporarily
+2. Copy your `tautulli.db` to `./data/import/tautulli.db` on your host
+3. Start Sentinel — the collector will begin collecting live events immediately
+4. Open the admin UI at `/admin` → **Import**
+5. Click **Start Import** and watch the progress bar
+6. On completion you'll see a full summary — sessions imported, metadata linked, users created
+7. Restart Plex — Sentinel is now your primary data source
+
+### Live migration (minimal downtime)
+
+If stopping Plex isn't practical:
+
+1. Copy `tautulli.db` to `./data/import/tautulli.db` while Plex is still running
+2. Start Sentinel — the collector picks up live events from this point forward
+3. Run the import — any sessions started after the copy will be collected live
+4. A small overlap or gap at the cutover point is expected and acceptable
+
+The import is safe to run multiple times — duplicate sessions are detected via unique session keys and skipped automatically.
+
+### Finding your tautulli.db
+
+| Platform | Default path |
+|---|---|
+| Unraid | `/mnt/user/appdata/tautulli/tautulli.db` |
+| Linux | `~/.local/share/Tautulli/tautulli.db` |
+| Docker | Inside your Tautulli appdata volume |
+
+### What gets imported
+
+- Full play history with start/stop times and watch duration
+- Media metadata (title, show, season, episode, year, poster paths)
+- All users from your Plex server
+- Transcode decisions and platform info
+
+### Performance expectations
+
+| Library size | Estimated import time |
+|---|---|
+| ~50k sessions | ~3-4 minutes |
+| ~100k sessions | ~6-7 minutes |
+| ~172k sessions | ~11 minutes |
 
 ---
 
@@ -229,3 +266,37 @@ GPL-3.0 — see [LICENSE](LICENSE)
 
 - [Atrium](https://github.com/LFFPicard/atrium) — self-hosted homelab portal
 - [Atrium Rewind](https://github.com/LFFPicard/atrium-rewind) — Spotify Wrapped-style stats for Plex
+
+---
+
+## First Run
+
+On first start, Sentinel automatically generates an admin API key and prints it to the container logs:
+
+```
+╔═════════════════════════════════════════════════════════════════╗
+║  SENTINEL FIRST RUN — ADMIN KEY                                 ║
+║                                                                 ║
+║  sk_admin_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  ║
+║                                                                 ║
+║  Save this key — it will never be shown again.                  ║
+║  Use it to log into the admin UI at /admin                      ║
+╚═════════════════════════════════════════════════════════════════╝
+```
+
+**On Unraid:** Check the container logs in the Docker tab immediately after first start.
+**On Linux:** Run `docker compose logs sentinel-api | grep -A 8 "FIRST RUN"`
+
+Copy the key and use it to log into `/admin`. It is stored as a bcrypt hash — the plaintext is never shown again. You can generate additional read keys for consuming apps from the admin UI.
+
+---
+
+## Logs
+
+Collector logs are written to `./data/logs/collector.log` on your host. Logs rotate at 10MB, keeping the last 3 files.
+
+View recent logs in the admin UI under **Maintenance → Collector Logs**, or directly:
+
+```bash
+tail -f ./data/logs/collector.log
+```
