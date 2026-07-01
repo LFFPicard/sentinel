@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Sentinel-DB</Name>
+  <Repository>postgres:17-alpine</Repository>
+  <Registry>https://hub.docker.com/_/postgres</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/LFFPicard/sentinel/issues</Support>
+  <Project>https://github.com/LFFPicard/sentinel</Project>
+  <Overview>PostgreSQL database for Sentinel — the Plex data vault. This is the storage layer only; install this first, then Sentinel-Collector and Sentinel-API. All three containers together make up the Sentinel stack.&#13;
+&#13;
+Part of the LFFPicard homelab ecosystem: https://github.com/LFFPicard</Overview>
+  <Category>MediaApp:Other Tools:</Category>
+  <WebUI/>
+  <TemplateURL>https://raw.githubusercontent.com/LFFPicard/sentinel/main/unraid/sentinel-db.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/LFFPicard/sentinel/main/assets/sentinel-icon.png</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires>Install this container first, before Sentinel-Collector and Sentinel-API.</Requires>
+  <Config Name="Data Path" Target="/var/lib/postgresql/data" Default="/mnt/user/appdata/sentinel/postgres" Mode="rw" Description="Where PostgreSQL stores the database files" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/sentinel/postgres</Config>
+  <Config Name="Postgres DB" Target="POSTGRES_DB" Default="sentinel" Mode="" Description="Database name — leave as default" Type="Variable" Display="advanced" Required="true" Mask="false">sentinel</Config>
+  <Config Name="Postgres User" Target="POSTGRES_USER" Default="sentinel" Mode="" Description="Database user — leave as default" Type="Variable" Display="advanced" Required="true" Mask="false">sentinel</Config>
+  <Config Name="Postgres Password" Target="POSTGRES_PASSWORD" Default="" Mode="" Description="Database password — set a strong password. You will need this exact value when configuring Sentinel-Collector and Sentinel-API." Type="Variable" Display="always" Required="true" Mask="true"></Config>
+</Container>

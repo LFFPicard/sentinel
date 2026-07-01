@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Sentinel-API</Name>
+  <Repository>lffpicard/sentinel-api:latest</Repository>
+  <Registry>https://hub.docker.com/r/lffpicard/sentinel-api</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/LFFPicard/sentinel/issues</Support>
+  <Project>https://github.com/LFFPicard/sentinel</Project>
+  <Overview>Sentinel's REST/WebSocket API and admin UI. Serves the data collected by Sentinel-Collector to any consuming app (Atrium, Atrium Rewind, or your own tools), and provides the admin interface for setup, Tautulli import, and database management.&#13;
+&#13;
+Requires Sentinel-DB to be installed and running first.&#13;
+&#13;
+On first start, an admin API key is generated automatically — check this container's logs immediately after first start to retrieve it. It will not be shown again.&#13;
+&#13;
+Part of the LFFPicard homelab ecosystem: https://github.com/LFFPicard</Overview>
+  <Category>MediaApp:Other Tools:</Category>
+  <WebUI>http://[IP]:[PORT:7700]/admin</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/LFFPicard/sentinel/main/unraid/sentinel-api.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/LFFPicard/sentinel/main/assets/sentinel-icon.png</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires>Requires Sentinel-DB to be running first.</Requires>
+  <Config Name="WebUI Port" Target="7700" Default="7700" Mode="tcp" Description="Port to access the Sentinel admin UI and API" Type="Port" Display="always" Required="true" Mask="false">7700</Config>
+  <Config Name="Logs Path" Target="/data/logs" Default="/mnt/user/appdata/sentinel/logs" Mode="rw" Description="Shared log path — same as Sentinel-Collector's logs path" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/sentinel/logs</Config>
+  <Config Name="Database URL" Target="DATABASE_URL" Default="" Mode="" Description="postgres://sentinel:YOUR_DB_PASSWORD@sentinel-db:5432/sentinel — replace YOUR_DB_PASSWORD with the password set in Sentinel-DB, and sentinel-db with that container's actual name or IP" Type="Variable" Display="always" Required="true" Mask="true"></Config>
+  <Config Name="Sentinel Port" Target="SENTINEL_PORT" Default="7700" Mode="" Description="Internal port — leave as default unless you know what you're doing" Type="Variable" Display="advanced" Required="true" Mask="false">7700</Config>
+</Container>
