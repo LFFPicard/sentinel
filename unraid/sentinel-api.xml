@@ -19,7 +19,7 @@ Part of the LFFPicard homelab ecosystem: https://github.com/LFFPicard</Overview>
   <Category>MediaApp:Other Tools:</Category>
   <WebUI>http://[IP]:[PORT:7700]/admin</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/LFFPicard/sentinel/main/unraid/sentinel-api.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/LFFPicard/sentinel/main/assets/sentinel-icon.png</Icon>
+  <Icon>https://raw.githubusercontent.com/LFFPicard/sentinel/main/assets/sentinel-api-icon.png</Icon>
   <ExtraParams/>
   <PostArgs/>
   <CPUset/>

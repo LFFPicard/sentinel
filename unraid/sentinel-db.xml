@@ -15,7 +15,7 @@ Part of the LFFPicard homelab ecosystem: https://github.com/LFFPicard</Overview>
   <Category>MediaApp:Other Tools:</Category>
   <WebUI/>
   <TemplateURL>https://raw.githubusercontent.com/LFFPicard/sentinel/main/unraid/sentinel-db.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/LFFPicard/sentinel/main/assets/sentinel-icon.png</Icon>
+  <Icon>https://raw.githubusercontent.com/LFFPicard/sentinel/main/assets/sentinel-db-icon.png</Icon>
   <ExtraParams/>
   <PostArgs/>
   <CPUset/>
